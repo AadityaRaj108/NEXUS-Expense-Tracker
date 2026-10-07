@@ -577,17 +577,14 @@ def using_postgres(db=None):
         current_app.config.get("DATABASE_URL")
     )
 
+
 def get_db():
     if "db" not in g:
-
-        if using_postgres(db):
-
+        if using_postgres():
             g.db = PostgresDB(
                 current_app.config["DATABASE_URL"]
             )
-
         else:
-
             g.db = sqlite3.connect(
                 current_app.config["DATABASE"]
             )
@@ -610,7 +607,6 @@ def close_db(_error=None):
 
     if db is not None:
         db.close()
-
 
 # ============================================================
 # DATABASE INTROSPECTION
