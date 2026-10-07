@@ -6,6 +6,7 @@ from html import escape
 
 from flask import (
     Blueprint,
+    current_app,
     render_template,
     request,
     redirect,
@@ -43,6 +44,15 @@ CATEGORIES = [
     "Other",
 ]
 
+INCOME_CATEGORIES = [
+    "Salary",
+    "Freelance",
+    "Business",
+    "Investment",
+    "Gift",
+    "Other",
+]
+
 PAYMENTS = [
     "Cash",
     "UPI",
@@ -63,7 +73,6 @@ def login_required(fn):
     def wrapper(*args, **kwargs):
         if "user_id" not in session:
             return redirect(url_for("main.login"))
-
         return fn(*args, **kwargs)
 
     return wrapper
@@ -81,7 +90,7 @@ def parse_voice_transaction(text):
         - numeric amounts:
             500000
             5,00,000
-            â‚¹500000
+            ₹500000
             Rs 500000
         - Indian units:
             thousand
@@ -140,13 +149,19 @@ def parse_voice_transaction(text):
     income_score = sum(
         1
         for word in income_words
-        if re.search(rf"\b{re.escape(word)}\b", lower)
+        if re.search(
+            rf"\b{re.escape(word)}\b",
+            lower,
+        )
     )
 
     expense_score = sum(
         1
         for word in expense_words
-        if re.search(rf"\b{re.escape(word)}\b", lower)
+        if re.search(
+            rf"\b{re.escape(word)}\b",
+            lower,
+        )
     )
 
     if income_score > expense_score:
@@ -264,7 +279,6 @@ def parse_voice_transaction(text):
     # --------------------------------------------------------
 
     if amount is None and spoken_matches:
-
         money_context = any(
             word in lower
             for word in [
@@ -272,7 +286,7 @@ def parse_voice_transaction(text):
                 "rupees",
                 "rs",
                 "inr",
-                "â‚¹",
+                "₹",
                 "spent",
                 "spend",
                 "paid",
@@ -300,28 +314,24 @@ def parse_voice_transaction(text):
     # --------------------------------------------------------
 
     if amount is None:
-
         numeric_patterns = [
-            r"(?:â‚¹|rs\.?|inr)\s*([\d,]+(?:\.\d+)?)",
+            r"(?:₹|rs\.?|inr)\s*([\d,]+(?:\.\d+)?)",
             r"\b([\d]{1,3}(?:,[\d]{2,3})+)\b",
             r"\b(\d+(?:\.\d+)?)\b",
         ]
 
         for pattern in numeric_patterns:
-
             match = re.search(
                 pattern,
                 lower,
             )
 
             if match:
-
                 try:
                     amount = float(
                         match.group(1).replace(",", "")
                     )
                     break
-
                 except ValueError:
                     pass
 
@@ -364,7 +374,6 @@ def parse_voice_transaction(text):
             "cafe",
             "snack",
         ],
-
         "Transport": [
             "transport",
             "petrol",
@@ -380,7 +389,6 @@ def parse_voice_transaction(text):
             "rickshaw",
             "auto",
         ],
-
         "Bills": [
             "bill",
             "bills",
@@ -393,7 +401,6 @@ def parse_voice_transaction(text):
             "phone bill",
             "rent",
         ],
-
         "Shopping": [
             "shopping",
             "clothes",
@@ -404,7 +411,6 @@ def parse_voice_transaction(text):
             "amazon",
             "flipkart",
         ],
-
         "Entertainment": [
             "movie",
             "movies",
@@ -416,7 +422,6 @@ def parse_voice_transaction(text):
             "entertainment",
             "concert",
         ],
-
         "Health": [
             "medicine",
             "medicines",
@@ -427,7 +432,6 @@ def parse_voice_transaction(text):
             "medical",
             "gym",
         ],
-
         "Education": [
             "education",
             "college",
@@ -443,7 +447,6 @@ def parse_voice_transaction(text):
             "study",
             "udemy",
         ],
-
         "Travel": [
             "travel",
             "trip",
@@ -457,7 +460,6 @@ def parse_voice_transaction(text):
     category = "Other"
 
     for candidate_category, keywords in category_keywords.items():
-
         if any(
             keyword in lower
             for keyword in keywords
@@ -525,8 +527,7 @@ def parse_voice_transaction(text):
 
     if "yesterday" in lower:
         transaction_date = (
-            date.today()
-            - timedelta(days=1)
+            date.today() - timedelta(days=1)
         )
 
     # --------------------------------------------------------
@@ -544,7 +545,7 @@ def parse_voice_transaction(text):
         "note": original,
         "transcript": original,
         "message": (
-            f"Detected â‚¹{amount:,.0f} {kind} "
+            f"Detected ₹{amount:,.0f} {kind} "
             f"for {category} via {payment_method}."
         ),
     }
@@ -557,12 +558,13 @@ def parse_voice_transaction(text):
 def validate_email_address(value):
     value = (value or "").strip().lower()
 
-    pattern = (
-        r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-    )
+    pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
     return bool(
-        re.match(pattern, value)
+        re.fullmatch(
+            pattern,
+            value,
+        )
     )
 
 
@@ -611,6 +613,7 @@ def send_email_via_resend(
         raise RuntimeError(
             "RESEND_API_KEY is not configured."
         )
+
     if not email_from:
         email_from = "onboarding@resend.dev"
 
@@ -630,31 +633,30 @@ def send_email_via_resend(
         "to": [recipient],
         "subject": subject,
         "html": (
-            "<div style="
-            "\"font-family:Arial,sans-serif;"
+            '<div style="'
+            "font-family:Arial,sans-serif;"
             "line-height:1.6;"
-            "white-space:normal;\">"
+            "white-space:normal;"
+            '">'
             f"{safe_body}"
             "</div>"
         ),
     }
 
-    response = resend.Emails.send(
-        params
-    )
+    response = resend.Emails.send(params)
 
     provider_id = None
 
     if isinstance(response, dict):
-        provider_id = (
-            response.get("id")
-            or response.get("data", {}).get("id")
-            if isinstance(
-                response.get("data"),
-                dict,
+        data = response.get("data")
+
+        if isinstance(data, dict):
+            provider_id = (
+                response.get("id")
+                or data.get("id")
             )
-            else response.get("id")
-        )
+        else:
+            provider_id = response.get("id")
 
     else:
         provider_id = getattr(
@@ -763,7 +765,6 @@ def send_sms_via_twilio(
 
 @main.route("/")
 def index():
-
     if "user_id" in session:
         return redirect(
             url_for("main.dashboard")
@@ -783,14 +784,12 @@ def index():
     methods=["GET", "POST"],
 )
 def register():
-
     if "user_id" in session:
         return redirect(
             url_for("main.dashboard")
         )
 
     if request.method == "POST":
-
         name = request.form.get(
             "name",
             "",
@@ -806,9 +805,7 @@ def register():
             "",
         )
 
-        email_pattern = (
-            r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-        )
+        email_pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 
         if not name:
             flash(
@@ -819,7 +816,7 @@ def register():
                 url_for("main.register")
             )
 
-        if not re.match(
+        if not re.fullmatch(
             email_pattern,
             email,
         ):
@@ -842,25 +839,32 @@ def register():
 
         db = get_db()
 
-        existing = db.execute(
-            """
-            SELECT id
-            FROM users
-            WHERE email=?
-            """,
-            (email,),
-        ).fetchone()
-
-        if existing:
-            flash(
-                "That email is already registered.",
-                "error",
-            )
-            return redirect(
-                url_for("main.login")
-            )
-
         try:
+            # ------------------------------------------------
+            # EXISTING USER CHECK
+            # ------------------------------------------------
+
+            existing = db.execute(
+                """
+                SELECT id
+                FROM users
+                WHERE email=?
+                """,
+                (email,),
+            ).fetchone()
+
+            if existing:
+                flash(
+                    "That email is already registered.",
+                    "error",
+                )
+                return redirect(
+                    url_for("main.login")
+                )
+
+            # ------------------------------------------------
+            # USER
+            # ------------------------------------------------
 
             cur = db.execute(
                 """
@@ -874,13 +878,16 @@ def register():
                 (
                     name,
                     email,
-                    generate_password_hash(
-                        password
-                    ),
+                    generate_password_hash(password),
                 ),
             )
 
             user_id = cur.lastrowid
+
+            if user_id is None:
+                raise RuntimeError(
+                    "User registration did not return a user ID."
+                )
 
             # ------------------------------------------------
             # PROFILE
@@ -896,7 +903,6 @@ def register():
             ).fetchone()
 
             if not profile:
-
                 parts = [
                     part
                     for part in name.split()
@@ -954,7 +960,6 @@ def register():
             ).fetchone()
 
             if not prefs:
-
                 db.execute(
                     """
                     INSERT INTO notification_preferences(
@@ -967,9 +972,6 @@ def register():
 
             # ------------------------------------------------
             # PERSONAL WORKSPACE
-            #
-            # db.py migration handles old owner_id schemas.
-            # New accounts get their workspace here.
             # ------------------------------------------------
 
             workspace = db.execute(
@@ -985,7 +987,6 @@ def register():
             ).fetchone()
 
             if workspace is None:
-
                 workspace_name = (
                     f"{name}'s Personal Space"
                 )
@@ -1000,7 +1001,6 @@ def register():
                 ).fetchone()
 
                 if legacy_owner:
-
                     db.execute(
                         """
                         INSERT INTO workspaces(
@@ -1022,9 +1022,7 @@ def register():
                             user_id,
                         ),
                     )
-
                 else:
-
                     db.execute(
                         """
                         INSERT INTO workspaces(
@@ -1044,14 +1042,26 @@ def register():
                         ),
                     )
 
-                workspace_id = db.execute(
+                workspace_id_row = db.execute(
                     """
                     SELECT last_insert_rowid()
                     """
-                ).fetchone()[0]
+                ).fetchone()
+
+                if not workspace_id_row:
+                    raise RuntimeError(
+                        "Personal workspace creation did not return an ID."
+                    )
+
+                workspace_id = workspace_id_row[0]
 
             else:
                 workspace_id = workspace["id"]
+
+            if workspace_id is None:
+                raise RuntimeError(
+                    "Personal workspace ID is invalid."
+                )
 
             # ------------------------------------------------
             # OWNER MEMBERSHIP
@@ -1076,6 +1086,10 @@ def register():
                 ),
             )
 
+            # ------------------------------------------------
+            # COMMIT COMPLETE REGISTRATION
+            # ------------------------------------------------
+
             db.commit()
 
             session.clear()
@@ -1092,8 +1106,13 @@ def register():
                 url_for("main.dashboard")
             )
 
-        except Exception:
+        except Exception as exc:
             db.rollback()
+
+            current_app.logger.exception(
+                "NEXUS registration failed: %s",
+                exc,
+            )
 
             flash(
                 "Unable to create the account. Please try again.",
@@ -1111,14 +1130,12 @@ def register():
     methods=["GET", "POST"],
 )
 def login():
-
     if "user_id" in session:
         return redirect(
             url_for("main.dashboard")
         )
 
     if request.method == "POST":
-
         email = request.form.get(
             "email",
             "",
@@ -1142,7 +1159,6 @@ def login():
             user["password_hash"],
             password,
         ):
-
             session.clear()
 
             session["user_id"] = user["id"]
@@ -1165,7 +1181,6 @@ def login():
 
 @main.route("/logout")
 def logout():
-
     session.clear()
 
     return redirect(
@@ -1180,7 +1195,6 @@ def logout():
 @main.post("/api/password/change")
 @login_required
 def change_password():
-
     data = (
         request.get_json(silent=True)
         or request.form
@@ -1197,7 +1211,6 @@ def change_password():
     )
 
     if len(new_password) < 6:
-
         return jsonify({
             "success": False,
             "message": (
@@ -1221,7 +1234,6 @@ def change_password():
         user["password_hash"],
         current_password,
     ):
-
         return jsonify({
             "success": False,
             "message": (
@@ -1260,14 +1272,12 @@ def change_password():
 @main.route("/dashboard")
 @login_required
 def dashboard():
-
     db = get_db()
     uid = session["user_id"]
 
     totals = db.execute(
         """
         SELECT
-
             COALESCE(
                 SUM(
                     CASE
@@ -1278,7 +1288,6 @@ def dashboard():
                 ),
                 0
             ) AS income,
-
             COALESCE(
                 SUM(
                     CASE
@@ -1289,9 +1298,7 @@ def dashboard():
                 ),
                 0
             ) AS expense
-
         FROM transactions
-
         WHERE user_id=?
         """,
         (uid,),
@@ -1315,51 +1322,39 @@ def dashboard():
         SELECT
             category,
             SUM(amount) AS total
-
         FROM transactions
-
         WHERE user_id=?
           AND kind='expense'
-
         GROUP BY category
-
         ORDER BY total DESC
         """,
         (uid,),
     ).fetchall()
 
-    forecast = forecast_next_month(
-        uid
-    )
+    forecast = forecast_next_month(uid)
 
     return render_template(
         "dashboard.html",
-
         name=session.get(
             "user_name",
             "User",
         ),
-
         income=float(
             totals["income"] or 0
         ),
-
         expense=float(
             totals["expense"] or 0
         ),
-
         balance=float(
             (totals["income"] or 0)
             - (totals["expense"] or 0)
         ),
-
         recent=recent,
         category_totals=category_totals,
         forecast=forecast,
-
         today=date.today().isoformat(),
-
         categories=CATEGORIES,
+        income_categories=INCOME_CATEGORIES,
         payments=PAYMENTS,
     )
 
@@ -1371,11 +1366,9 @@ def dashboard():
 @main.post("/transactions/add")
 @login_required
 def add_transaction():
-
     uid = session["user_id"]
 
     try:
-
         amount = float(
             request.form.get(
                 "amount",
@@ -1390,7 +1383,6 @@ def add_transaction():
         ValueError,
         TypeError,
     ):
-
         flash(
             "Amount must be greater than zero.",
             "error",
@@ -1429,7 +1421,6 @@ def add_transaction():
         "income",
         "expense",
     ):
-
         flash(
             "Invalid transaction type.",
             "error",
@@ -1439,8 +1430,13 @@ def add_transaction():
             url_for("main.dashboard")
         )
 
-    if ((kind == "income" and category not in INCOME_CATEGORIES) or (kind == "expense" and category not in CATEGORIES)): 
-
+    if (
+        kind == "income"
+        and category not in INCOME_CATEGORIES
+    ) or (
+        kind == "expense"
+        and category not in CATEGORIES
+    ):
         flash(
             "Invalid transaction category.",
             "error",
@@ -1451,7 +1447,6 @@ def add_transaction():
         )
 
     if payment_method not in PAYMENTS:
-
         flash(
             "Invalid payment method.",
             "error",
@@ -1510,14 +1505,11 @@ def add_transaction():
 @main.route("/transactions")
 @login_required
 def transactions():
-
     rows = get_db().execute(
         """
         SELECT *
         FROM transactions
-
         WHERE user_id=?
-
         ORDER BY
             transaction_date DESC,
             id DESC
@@ -1536,7 +1528,6 @@ def transactions():
 )
 @login_required
 def delete_transaction(tx_id):
-
     db = get_db()
 
     db.execute(
@@ -1570,7 +1561,6 @@ def delete_transaction(tx_id):
 @main.post("/api/voice/parse")
 @login_required
 def api_voice_parse():
-
     data = (
         request.get_json(silent=True)
         or {}
@@ -1581,9 +1571,7 @@ def api_voice_parse():
         "",
     )
 
-    result = parse_voice_transaction(
-        text
-    )
+    result = parse_voice_transaction(text)
 
     if not result.get("success"):
         return jsonify(result), 400
@@ -1640,7 +1628,6 @@ def api_voice_parse():
 @main.post("/api/voice/confirm")
 @login_required
 def api_voice_confirm():
-
     data = (
         request.get_json(silent=True)
         or {}
@@ -1651,7 +1638,6 @@ def api_voice_confirm():
     )
 
     if not voice_command_id:
-
         return jsonify({
             "success": False,
             "message": (
@@ -1675,7 +1661,6 @@ def api_voice_confirm():
     ).fetchone()
 
     if not command:
-
         return jsonify({
             "success": False,
             "message": (
@@ -1684,7 +1669,6 @@ def api_voice_confirm():
         }), 404
 
     if command["status"] == "confirmed":
-
         return jsonify({
             "success": False,
             "message": (
@@ -1694,7 +1678,6 @@ def api_voice_confirm():
         }), 409
 
     if command["status"] == "rejected":
-
         return jsonify({
             "success": False,
             "message": (
@@ -1707,7 +1690,6 @@ def api_voice_confirm():
         "income",
         "expense",
     ):
-
         return jsonify({
             "success": False,
             "message": (
@@ -1715,8 +1697,13 @@ def api_voice_confirm():
             ),
         }), 400
 
-    if command["parsed_category"] not in CATEGORIES:
+    valid_categories = (
+        INCOME_CATEGORIES
+        if command["parsed_kind"] == "income"
+        else CATEGORIES
+    )
 
+    if command["parsed_category"] not in valid_categories:
         return jsonify({
             "success": False,
             "message": (
@@ -1725,7 +1712,6 @@ def api_voice_confirm():
         }), 400
 
     if command["parsed_payment_method"] not in PAYMENTS:
-
         return jsonify({
             "success": False,
             "message": (
@@ -1734,7 +1720,6 @@ def api_voice_confirm():
         }), 400
 
     try:
-
         cursor = db.execute(
             """
             INSERT INTO transactions(
@@ -1778,11 +1763,9 @@ def api_voice_confirm():
         db.execute(
             """
             UPDATE voice_commands
-
             SET
                 status='confirmed',
                 transaction_id=?
-
             WHERE id=?
               AND user_id=?
             """,
@@ -1805,13 +1788,17 @@ def api_voice_confirm():
         })
 
     except Exception as exc:
-
         db.rollback()
+
+        current_app.logger.exception(
+            "Voice transaction confirmation failed: %s",
+            exc,
+        )
 
         return jsonify({
             "success": False,
             "message": (
-                f"Unable to save transaction: {exc}"
+                "Unable to save transaction."
             ),
         }), 500
 
@@ -1819,7 +1806,6 @@ def api_voice_confirm():
 @main.post("/api/voice/reject")
 @login_required
 def api_voice_reject():
-
     data = (
         request.get_json(silent=True)
         or {}
@@ -1830,7 +1816,6 @@ def api_voice_reject():
     )
 
     if not voice_command_id:
-
         return jsonify({
             "success": False,
             "message": (
@@ -1854,7 +1839,6 @@ def api_voice_reject():
     ).fetchone()
 
     if not command:
-
         return jsonify({
             "success": False,
             "message": (
@@ -1863,7 +1847,6 @@ def api_voice_reject():
         }), 404
 
     if command["status"] == "confirmed":
-
         return jsonify({
             "success": False,
             "message": (
@@ -1902,7 +1885,6 @@ def api_voice_reject():
 @main.post("/api/email/send")
 @login_required
 def api_email_send():
-
     data = (
         request.get_json(silent=True)
         or request.form
@@ -1929,10 +1911,7 @@ def api_email_send():
         or ""
     ).strip()
 
-    if not validate_email_address(
-        recipient
-    ):
-
+    if not validate_email_address(recipient):
         return jsonify({
             "success": False,
             "message": (
@@ -1942,7 +1921,6 @@ def api_email_send():
         }), 400
 
     if not subject:
-
         return jsonify({
             "success": False,
             "message": (
@@ -1951,7 +1929,6 @@ def api_email_send():
         }), 400
 
     if not message_body:
-
         return jsonify({
             "success": False,
             "message": (
@@ -1994,24 +1971,19 @@ def api_email_send():
     db.commit()
 
     try:
-
-        provider_message_id = (
-            send_email_via_resend(
-                recipient=recipient,
-                subject=subject,
-                message_body=message_body,
-            )
+        provider_message_id = send_email_via_resend(
+            recipient=recipient,
+            subject=subject,
+            message_body=message_body,
         )
 
         db.execute(
             """
             UPDATE email_logs
-
             SET
                 status='sent',
                 provider_message_id=?,
                 sent_at=CURRENT_TIMESTAMP
-
             WHERE id=?
               AND user_id=?
             """,
@@ -2032,17 +2004,14 @@ def api_email_send():
         })
 
     except Exception as exc:
-
         error_message = str(exc)
 
         db.execute(
             """
             UPDATE email_logs
-
             SET
                 status='failed',
                 error_message=?
-
             WHERE id=?
               AND user_id=?
             """,
@@ -2054,6 +2023,11 @@ def api_email_send():
         )
 
         db.commit()
+
+        current_app.logger.exception(
+            "Email delivery failed: %s",
+            exc,
+        )
 
         return jsonify({
             "success": False,
@@ -2072,7 +2046,6 @@ def api_email_send():
 @main.post("/api/sms/send")
 @login_required
 def api_sms_send():
-
     data = (
         request.get_json(silent=True)
         or request.form
@@ -2089,10 +2062,7 @@ def api_sms_send():
         or ""
     ).strip()
 
-    if not validate_phone_number(
-        recipient
-    ):
-
+    if not validate_phone_number(recipient):
         return jsonify({
             "success": False,
             "message": (
@@ -2103,7 +2073,6 @@ def api_sms_send():
         }), 400
 
     if not message_body:
-
         return jsonify({
             "success": False,
             "message": (
@@ -2112,7 +2081,6 @@ def api_sms_send():
         }), 400
 
     if len(message_body) > 1600:
-
         return jsonify({
             "success": False,
             "message": (
@@ -2150,23 +2118,18 @@ def api_sms_send():
     db.commit()
 
     try:
-
-        provider_message_id = (
-            send_sms_via_twilio(
-                recipient=recipient,
-                message_body=message_body,
-            )
+        provider_message_id = send_sms_via_twilio(
+            recipient=recipient,
+            message_body=message_body,
         )
 
         db.execute(
             """
             UPDATE sms_logs
-
             SET
                 status='sent',
                 provider_message_id=?,
                 sent_at=CURRENT_TIMESTAMP
-
             WHERE id=?
               AND user_id=?
             """,
@@ -2187,17 +2150,14 @@ def api_sms_send():
         })
 
     except Exception as exc:
-
         error_message = str(exc)
 
         db.execute(
             """
             UPDATE sms_logs
-
             SET
                 status='failed',
                 error_message=?
-
             WHERE id=?
               AND user_id=?
             """,
@@ -2209,6 +2169,11 @@ def api_sms_send():
         )
 
         db.commit()
+
+        current_app.logger.exception(
+            "SMS delivery failed: %s",
+            exc,
+        )
 
         return jsonify({
             "success": False,
@@ -2227,7 +2192,6 @@ def api_sms_send():
 @main.get("/api/communications/history")
 @login_required
 def api_communications_history():
-
     db = get_db()
     uid = session["user_id"]
 
@@ -2324,7 +2288,6 @@ def api_communications_history():
 @main.route("/analytics")
 @login_required
 def analytics():
-
     db = get_db()
     uid = session["user_id"]
 
@@ -2336,7 +2299,6 @@ def analytics():
                 1,
                 7
             ) AS month,
-
             SUM(
                 CASE
                     WHEN kind='income'
@@ -2344,7 +2306,6 @@ def analytics():
                     ELSE 0
                 END
             ) AS income,
-
             SUM(
                 CASE
                     WHEN kind='expense'
@@ -2352,13 +2313,9 @@ def analytics():
                     ELSE 0
                 END
             ) AS expense
-
         FROM transactions
-
         WHERE user_id=?
-
         GROUP BY month
-
         ORDER BY month
         """,
         (uid,),
@@ -2369,22 +2326,16 @@ def analytics():
         SELECT
             category,
             SUM(amount) AS total
-
         FROM transactions
-
         WHERE user_id=?
           AND kind='expense'
-
         GROUP BY category
-
         ORDER BY total DESC
         """,
         (uid,),
     ).fetchall()
 
-    forecast = forecast_next_month(
-        uid
-    )
+    forecast = forecast_next_month(uid)
 
     return render_template(
         "analytics.html",
@@ -2401,7 +2352,6 @@ def analytics():
 @main.route("/budgets")
 @login_required
 def budgets():
-
     uid = session["user_id"]
 
     month = request.args.get(
@@ -2414,15 +2364,11 @@ def budgets():
     rows = db.execute(
         """
         SELECT
-
             b.*,
-
             COALESCE(
                 (
                     SELECT SUM(t.amount)
-
                     FROM transactions t
-
                     WHERE t.user_id=b.user_id
                       AND t.kind='expense'
                       AND t.category=b.category
@@ -2434,12 +2380,9 @@ def budgets():
                 ),
                 0
             ) AS spent
-
         FROM budgets b
-
         WHERE b.user_id=?
           AND b.month=?
-
         ORDER BY b.category
         """,
         (
@@ -2459,7 +2402,6 @@ def budgets():
 @main.post("/budgets/save")
 @login_required
 def save_budget():
-
     uid = session["user_id"]
 
     category = request.form.get(
@@ -2468,11 +2410,11 @@ def save_budget():
     )
 
     month = request.form.get(
-        "month"
+        "month",
+        date.today().strftime("%Y-%m"),
     )
 
     try:
-
         amount = float(
             request.form.get(
                 "amount",
@@ -2487,7 +2429,6 @@ def save_budget():
         ValueError,
         TypeError,
     ):
-
         flash(
             "Budget amount must be greater than zero.",
             "error",
@@ -2500,8 +2441,7 @@ def save_budget():
             )
         )
 
-    if ((kind == "income" and category not in INCOME_CATEGORIES) or (kind == "expense" and category not in CATEGORIES)): 
-
+    if category not in CATEGORIES:
         flash(
             "Invalid budget category.",
             "error",
@@ -2530,13 +2470,11 @@ def save_budget():
             ?,
             ?
         )
-
         ON CONFLICT(
             user_id,
             category,
             month
         )
-
         DO UPDATE SET
             amount=excluded.amount
         """,
@@ -2570,22 +2508,8 @@ def save_budget():
 @main.get("/api/forecast")
 @login_required
 def api_forecast():
-
     return jsonify(
         forecast_next_month(
             session["user_id"]
         )
     )
-
-
-
-
-
-
-
-# NEXUS income transaction categories
-INCOME_CATEGORIES = {'Salary','Freelance','Business','Investment','Gift','Other'}
-
-
-
-
