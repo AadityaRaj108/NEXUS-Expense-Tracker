@@ -14,14 +14,22 @@ def create_app():
         "nexus-development-secret-change-me",
     )
 
-    app.config["DATABASE"] = str(
-        Path(app.instance_path) / "expense_tracker.db"
-    )
+    # Production: PostgreSQL via DATABASE_URL (Neon/Render)
+    # Local development: SQLite fallback.
+    database_url = os.environ.get("DATABASE_URL")
 
-    Path(app.instance_path).mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    if database_url:
+        app.config["DATABASE_URL"] = database_url
+        app.config["DATABASE"] = database_url
+    else:
+        app.config["DATABASE"] = str(
+            Path(app.instance_path) / "expense_tracker.db"
+        )
+
+        Path(app.instance_path).mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
     init_db(app)
 
