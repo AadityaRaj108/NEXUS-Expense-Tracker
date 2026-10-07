@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS — Personal finance intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f1;--ink:#13203a;--mu:#5d6a80;--g:#0e7c66;--gd:#0d3b33;--gl:#d7efe6;--am:#f2a93b;--vi:#5b4bdb;--ln:#dfe4dc}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Manrope,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--am);outline-offset:3px}
+.w{max-width:1180px;margin:0 auto;padding:0 28px}
+.serif{font-family:'Instrument Serif',serif;font-weight:400;letter-spacing:-.01em}
+.k{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--mu)}
+.btn{display:inline-block;padding:14px 26px;border-radius:99px;font-weight:700;border:0;cursor:pointer;font:700 1rem Manrope;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}
+.b1{background:var(--g);color:#fff}.b2{border:1.5px solid var(--ink)}
+section{padding:110px 0}
+ 
+nav{position:sticky;top:0;z-index:9;background:rgba(244,246,241,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--ln)}
+nav .w{display:flex;align-items:center;gap:36px;height:70px}
+.logo{font-weight:800;font-size:1.25rem;letter-spacing:.08em;margin-right:auto}
+nav a:not(.logo):not(.btn){color:var(--mu);font-weight:500}
+nav a:hover{color:var(--ink)}
+nav .btn{padding:10px 20px}
+ 
+.hero{padding:70px 0 100px}
+.hg{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.new{display:inline-flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--ln);padding:6px 16px 6px 6px;border-radius:99px;font-size:.88rem;margin-bottom:28px}
+.new b{background:var(--am);padding:3px 10px;border-radius:99px;font-size:.7rem;letter-spacing:.06em}
+h1{font-size:clamp(3rem,6.4vw,5.6rem);line-height:.98}
+.lede{font-size:1.18rem;color:var(--mu);margin:26px 0 34px;max-width:520px}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.proof{margin-top:30px;color:var(--mu);font-size:.92rem}
+ 
+.mock{background:#fff;border:1px solid var(--ln);border-radius:28px;padding:28px;box-shadow:0 40px 80px -30px rgba(19,32,58,.28)}
+.mock h4{font-size:1.5rem}
+.mock .sub{display:flex;justify-content:space-between;color:var(--mu);font-size:.9rem;margin:2px 0 20px}
+.m2{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+.tile{background:var(--bg);border-radius:18px;padding:18px}
+.tile.g{background:var(--gd);color:#fff}.tile.g .k{color:#9fd6c6}
+.num{font-size:2rem;font-weight:800;letter-spacing:-.03em;margin:6px 0 2px}
+.up{color:var(--g);font-weight:700}.tile.g .up{color:var(--am)}
+.cf{margin-top:14px}.cf svg{width:100%;height:92px;display:block}
+.cf .l{display:flex;justify-content:space-between;font-size:.8rem;color:var(--mu)}
+.act{margin-top:16px}
+.act>div{display:flex;justify-content:space-between;padding:11px 0;border-top:1px solid var(--ln);font-weight:500}
+.act .h{border:0;padding:0 0 4px}
+.neg{color:var(--ink)}.pos{color:var(--g);font-weight:700}
+ 
+.trust{background:var(--gd);color:#fff}
+.tg{display:grid;grid-template-columns:1fr 1.1fr;gap:70px;align-items:center}
+.trust h2{font-size:clamp(2.4rem,4.6vw,4rem);line-height:1.02}
+.trust p{color:#b9d9d0;margin-top:18px;max-width:440px}
+.st{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.14);border-radius:22px;overflow:hidden}
+.st div{background:var(--gd);padding:28px}
+.st b{display:block;font-size:2.6rem;font-family:'Instrument Serif';font-weight:400;color:var(--am)}
+.st span{color:#cfe7df;font-size:.95rem}
+ 
+.hd{max-width:760px;margin-bottom:56px}
+.hd h2,.vis h2,.cta h2{font-size:clamp(2.6rem,5vw,4.4rem);line-height:1.02;margin-top:14px}
+.hd p{color:var(--mu);font-size:1.15rem;margin-top:16px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.f{background:#fff;border:1px solid var(--ln);border-radius:26px;padding:30px;display:flex;flex-direction:column;gap:14px}
+.f h3{font-size:1.9rem;line-height:1.1}
+.f>p{color:var(--mu)}
+.pan{margin-top:auto;background:var(--bg);border-radius:18px;padding:18px}
+.pan .big{font-size:1.9rem;font-weight:800;letter-spacing:-.03em}
+.tag{display:inline-block;background:var(--gl);color:var(--g);font-size:.7rem;font-weight:800;letter-spacing:.06em;padding:4px 10px;border-radius:99px}
+.tag.v{background:#e6e3fb;color:var(--vi)}
+.bk{height:9px;border-radius:9px;background:#dfe4dc;margin:5px 0 12px;overflow:hidden}.bk i{display:block;height:100%;background:var(--g);border-radius:9px}
+.ln{display:flex;justify-content:space-between;font-weight:600;font-size:.95rem}
+.sm{color:var(--mu);font-size:.88rem}
+.lk{font-weight:700;color:var(--g);border-bottom:2px solid var(--gl);align-self:flex-start;cursor:pointer}
+.cl{display:flex;align-items:center;gap:10px}.cl i{width:10px;height:10px;border-radius:50%;background:var(--g);box-shadow:0 0 0 5px var(--gl)}
+ 
+.vis{background:var(--gl)}
+.vis h2{max-width:960px;font-size:clamp(2.4rem,5vw,4.6rem)}
+.vis p{margin-top:24px;font-size:1.2rem;color:var(--mu)}
+ 
+.ins .f{gap:12px}
+.ring{--p:70;width:92px;height:92px;border-radius:50%;background:conic-gradient(var(--g) calc(var(--p)*1%),#dfe4dc 0);display:grid;place-items:center}
+.ring::after{content:attr(data-t);width:72px;height:72px;border-radius:50%;background:#fff;display:grid;place-items:center;font-weight:800;font-size:1.1rem}
+input[type=range]{width:100%;accent-color:var(--g);margin:10px 0 4px}
+ 
+.brief{background:#fff;border-top:1px solid var(--ln);border-bottom:1px solid var(--ln)}
+.bg2{display:grid;grid-template-columns:.9fr 1.1fr;gap:64px;align-items:start}
+.bg2 h2{font-size:clamp(2.4rem,4.4vw,3.8rem);line-height:1.02;margin:14px 0 20px}
+.bg2 p{color:var(--mu)}
+.paper{background:var(--bg);border:1px solid var(--ln);border-radius:26px;padding:34px}
+.ph{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--ln);padding-bottom:16px;margin-bottom:22px}
+.pulse{display:flex;gap:22px;align-items:center;margin-bottom:26px}
+.pulse .ring{--p:82;width:116px;height:116px;background:conic-gradient(var(--am) 82%,#dfe4dc 0)}
+.pulse .ring::after{width:92px;height:92px;font-size:2rem;font-family:'Instrument Serif';font-weight:400}
+.cp{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:6px}
+.cp h5{font-size:1.1rem;margin:6px 0}
+.due{display:grid;grid-template-columns:54px 1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--ln);align-items:center}
+.due span:first-child{font-size:.75rem;font-weight:800;color:var(--mu)}
+ 
+.steps .f{background:transparent;border:0;border-top:2px solid var(--ink);border-radius:0;padding:24px 0 0}
+.steps .f h3{font-size:1.7rem}
+.int{display:flex;gap:12px;flex-wrap:wrap;margin-top:50px;align-items:center}
+.int span{border:1.5px solid var(--ink);padding:9px 18px;border-radius:99px;font-weight:600}
+ 
+.tq{background:#fff;border-top:1px solid var(--ln)}
+.tg2{display:grid;grid-template-columns:1.3fr 1fr;gap:64px;align-items:center}
+.q{font-size:clamp(1.9rem,3.4vw,3rem);line-height:1.12}
+.q::before{content:"“";color:var(--am);font-size:5rem;line-height:0;display:block;height:34px}
+.who{margin-top:26px;display:flex;gap:14px;align-items:center}
+.av{width:50px;height:50px;border-radius:50%;background:var(--vi);color:#fff;display:grid;place-items:center;font-weight:800}
+.ms{display:grid;gap:0}
+.ms div{padding:22px 0;border-bottom:1px solid var(--ln)}
+.ms b{font-family:'Instrument Serif';font-size:3.2rem;font-weight:400;line-height:1;display:block}
+ 
+.cta{background:var(--gd);color:#fff;border-radius:44px;margin:0 28px;padding:80px 0}
+.cg{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center}
+.cta p{color:#b9d9d0;margin:18px 0 28px;max-width:520px}
+.cta form{display:flex;gap:10px;margin-top:26px;max-width:520px}
+.cta input[type=email]{flex:1;min-width:0;padding:14px 20px;border-radius:99px;border:0;font:500 1rem Manrope}
+.cta .b1{background:var(--am);color:var(--ink)}
+.cta .b2{border-color:#fff}
+.cta small{display:block;margin-top:14px;color:#9fd6c6}
+.cc{background:#fff;color:var(--ink);border-radius:26px;padding:28px}
+.cc .pulse{margin:0 0 20px}
+ 
+footer{padding:80px 0 40px}
+.fg{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px}
+footer h6{font-size:.72rem;letter-spacing:.08em;color:var(--mu);margin-bottom:14px}
+footer li{list-style:none;margin:8px 0}footer li a:hover{color:var(--g)}
+.fb{margin-top:60px;padding-top:22px;border-top:1px solid var(--ln);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--mu);font-size:.88rem}
+ 
+@media(max-width:900px){.hg,.tg,.three,.bg2,.tg2,.cg,.fg,.cp{grid-template-columns:1fr}nav a:not(.logo):not(.btn){display:none}section{padding:72px 0}.cta{margin:0 12px}.m2{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<nav><div class="w">
+  <a class="logo" href="#">NEXUS</a>
+  <a href="#product">Product</a><a href="#how">How it works</a><a href="#security">Security</a><a href="#insights">Insights</a>
+  <a href="/login">Sign in</a><a class="btn b1" href="#join">Join the waitlist</a>
+</div></nav>
+ 
+<header class="hero"><div class="w hg">
+  <div>
+    <a class="new" href="#brief"><b>NEW</b>Your weekly money briefing, written by NEXUS</a>
+    <h1 class="serif">See all of your money. Understand what comes next.</h1>
+    <p class="lede">NEXUS brings your everyday finances into one intelligent workspace—helping you track spending, understand patterns, manage budgets and forecast with confidence.</p>
+    <div class="row"><a class="btn b1" href="#join">Get early access</a><a class="btn b2" href="#product">Explore the product</a></div>
+    <p class="proof">Built with 1,200+ early members across India</p>
+  </div>
+  <div class="mock" aria-label="NEXUS product preview">
+    <div class="k">MY MONEY</div>
+    <h4 class="serif">Good morning, Arjun</h4>
+    <div class="sub"><span>Your money, today</span><span>This month</span></div>
+    <div class="m2">
+      <div class="tile g"><div class="k">NET WORTH</div><div class="num" id="nw" data-n="1842680">₹0</div><div class="up">↗ 6.8% <span style="font-weight:500;opacity:.8">vs last month</span></div></div>
+      <div class="tile"><div class="k">SAFE TO SPEND</div><div class="num" id="ss" data-n="38400">₹0</div><div class="sm">After bills, goals and your usual weekend spend.</div></div>
+    </div>
+    <div class="tile cf" style="margin-top:14px">
+      <div class="k">MONTHLY CASH FLOW</div>
+      <svg viewBox="0 0 300 92" preserveAspectRatio="none"><path id="cfp" d="M0 80 C30 70 45 40 75 46 S120 72 150 50 S200 14 230 30 S280 18 300 8" fill="none" stroke="#0e7c66" stroke-width="3.5" stroke-linecap="round"/></svg>
+      <div class="l"><span>₹0</span><span>₹42k</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px"><b class="pos">+₹42,180</b><span class="sm">₹8,240 better than usual</span></div>
+    </div>
+    <div class="act">
+      <div class="h"><b>Recent activity</b><a class="lk" style="font-size:.85rem" href="#">View all</a></div>
+      <div><span>Blinkit</span><span class="neg">−₹1,240</span></div>
+      <div><span>Tata Power</span><span class="neg">−₹2,860</span></div>
+      <div><span>Acme Studio</span><span class="pos">+₹1,45,000</span></div>
+    </div>
+  </div>
+</div></header>
+ 
+<section class="trust" id="security"><div class="w tg">
+  <div>
+    <h2 class="serif">Your data is yours. Always.</h2>
+    <p>Bank-grade encryption, read-only connections and zero sale of personal data.</p>
+  </div>
+  <div class="st">
+    <div><b>256-bit</b><span>AES encryption at rest and in transit</span></div>
+    <div><b>100%</b><span>Read-only account connections</span></div>
+    <div><b>DPDP</b><span>Privacy-ready data practices</span></div>
+    <div><b>24×7</b><span>Automated security monitoring</span></div>
+  </div>
+</div></section>
+ 
+<section id="product"><div class="w">
+  <div class="hd"><div class="k">ONE INTELLIGENT WORKSPACE</div><h2 class="serif">From money movement to meaningful direction.</h2><p>NEXUS connects the dots across accounts, transactions and time—so daily choices become easier to make.</p></div>
+  <div class="three">
+    <div class="f"><h3 class="serif">Track without the upkeep</h3><p>Every account and transaction, automatically organised in one living view.</p>
+      <div class="pan"><div class="cl"><i></i><b>TODAY · 30 SEP</b></div><div class="big" style="margin-top:10px">97%</div><div class="sm">of transactions classified automatically</div></div></div>
+    <div class="f"><h3 class="serif">Understand the why</h3><p>See the habits and patterns behind your numbers—not just another pie chart.</p>
+      <div class="pan"><div class="k">SEPTEMBER SPEND</div><div class="big">₹68,240</div><span class="tag v">PATTERN FOUND</span><p class="sm" style="margin:8px 0 12px">Your weekday food orders are up 32%.</p>
+        <div class="ln"><span>Home &amp; bills</span><span>₹28,400</span></div><div class="bk"><i style="width:42%"></i></div>
+        <div class="ln"><span>Food &amp; dining</span><span>₹15,260</span></div><div class="bk"><i style="width:22%;background:var(--am)"></i></div>
+        <p class="sm" style="margin-bottom:10px">Mostly between 8–10pm. Cooking twice more each week could save about ₹3,600 a month.</p>
+        <div class="ln"><span>Travel</span><span>₹9,800</span></div><div class="bk"><i style="width:14%;background:var(--vi)"></i></div></div>
+      <a class="lk" href="/login">See transactions</a></div>
+    <div class="f"><h3 class="serif">Forecast what’s next</h3><p>Plan around upcoming bills, goals and the way you actually live.</p>
+      <div class="pan"><div class="k">MONTH-END FORECAST</div><div class="big">₹1,27,600</div><span class="tag">HIGH CONFIDENCE</span><div class="up" style="margin-top:10px">+₹18,200</div></div>
+      <a class="lk" href="/login">Make a plan</a></div>
+  </div>
+</div></section>
+ 
+<section class="vis"><div class="w">
+  <div class="k">VISIBILITY</div>
+  <h2 class="serif">Better financial decisions don’t start with more discipline. They start with a clearer view.</h2>
+  <p>One source of truth, updated every day and explained in plain language.</p>
+</div></section>
+ 
+<section class="ins" id="insights"><div class="w">
+  <div class="hd"><div class="k">INTELLIGENCE IN CONTEXT</div><h2 class="serif">Not more data. The insight hiding inside it.</h2><p>NEXUS notices meaningful shifts, explains why they matter and suggests a useful next step.</p></div>
+  <div class="three">
+    <div class="f"><span class="k">INSIGHT 01</span><h3 class="serif">Your cash runway grew by 23 days.</h3><p>Lower discretionary spending and your annual bonus moved you ahead.</p>
+      <div class="pan"><div class="big">8.4</div><div class="sm">months of essential costs</div><span class="tag" style="margin-top:8px">+0.8 MO</span></div></div>
+    <div class="f"><span class="k">INSIGHT 02</span><h3 class="serif">₹4,728 repeats every month.</h3><p>Two services haven’t been used in 60 days. NEXUS can help you review them.</p>
+      <div class="pan"><div class="ln"><span>Streaming</span><span>₹1,498</span></div><div class="ln" style="margin-top:8px"><span>Software</span><span>₹2,180</span></div><div class="ln" style="margin-top:8px"><span>Memberships</span><span>₹1,050</span></div></div></div>
+    <div class="f"><span class="k">INSIGHT 03</span><h3 class="serif">Japan is now 6 weeks closer.</h3><p>At your current pace, you’ll reach ₹3,20,000 by <b id="jd">14 February</b>.</p>
+      <div class="pan"><div style="display:flex;gap:16px;align-items:center"><div class="ring" data-t="70%"></div><div><b>Japan fund</b><div class="big" style="font-size:1.5rem">₹2,24,800</div></div></div>
+        <input type="range" id="jr" min="0" max="8000" step="500" value="0" aria-label="Extra monthly saving">
+        <div class="sm" id="jt">Drag to add a monthly top-up. Add ₹4,000 monthly to arrive by New Year.</div></div></div>
+  </div>
+</div></section>
+ 
+<section class="brief" id="brief"><div class="w bg2">
+  <div>
+    <div class="k">YOUR WEEK IN MONEY</div>
+    <h2 class="serif">Weekly money briefing</h2>
+    <p style="font-size:1.15rem">A calm, useful read on what your money did.</p>
+    <p style="margin:18px 0 30px">Every week, NEXUS turns hundreds of movements into a five-minute briefing: what changed, what’s ahead and one action worth taking.</p>
+    <a class="btn b1" href="#join">Preview a briefing</a>
+  </div>
+  <div class="paper">
+    <div class="ph"><b>NEXUS / BRIEFING</b><span class="k">WEEK 39 · 2026</span></div>
+    <div class="pulse"><div class="ring" data-t="82"></div><div><div class="k">MONEY PULSE</div><div class="serif" style="font-size:2rem;line-height:1.1">Steady week. Stronger month.</div></div></div>
+    <div class="cp">
+      <div><div class="k">WHAT CHANGED</div><h5>Important changes, explained in context</h5><p class="sm"><b>Your savings rate reached 31%—the highest in six months.</b> A quiet social calendar and lower travel spend freed up ₹12,400. Your emergency fund is now two weeks ahead of plan.</p><a class="lk" href="/login">See what drove it</a></div>
+      <div><div class="k">COMING UP</div><h5>Upcoming bills and cash-flow pinch points</h5>
+        <div class="due"><span>03 OCT</span><span>Rent</span><b>₹32,000</b></div>
+        <div class="due"><span>07 OCT</span><span>SIP investments</span><b>₹18,000</b></div>
+        <div class="due"><span>11 OCT</span><span>Credit card</span><b>₹21,640</b></div></div>
+    </div>
+    <p class="sm" style="margin-top:18px">Goal progress without spreadsheet upkeep</p>
+  </div>
+</div></section>
+ 
+<section class="steps" id="how"><div class="w">
+  <div class="hd"><div class="k">SIMPLE BY DESIGN</div><h2 class="serif">A clearer financial life in about five minutes.</h2><a class="btn b1" href="#join" style="margin-top:24px">Get early access</a></div>
+  <div class="three">
+    <div class="f"><span class="k">STEP 01</span><h3 class="serif">Connect securely</h3><p>Link accounts with a read-only connection. Your credentials never touch NEXUS.</p></div>
+    <div class="f"><span class="k">STEP 02</span><h3 class="serif">Let NEXUS organise</h3><p>Transactions, recurring bills and goals are cleaned up automatically.</p></div>
+    <div class="f"><span class="k">STEP 03</span><h3 class="serif">See your next move</h3><p>Get a clear workspace, useful insights and forecasts from day one.</p></div>
+  </div>
+  <div class="int"><span class="k" style="margin-right:10px">DESIGNED FOR YOUR FINANCIAL LIFE</span><span>Bank accounts</span><span>Credit cards</span><span>UPI &amp; wallets</span><span>Investments</span></div>
+</div></section>
+ 
+<section class="tq"><div class="w tg2">
+  <div><div class="k" style="margin-bottom:22px">BUILT FOR REAL FINANCIAL LIVES</div>
+    <p class="q serif">NEXUS made my finances feel less like scattered admin and more like a system I can actually trust.</p>
+    <div class="who"><div class="av">M</div><div><b>Mira S.</b><div class="sm">Founder · Bengaluru</div><div class="sm">Mira uses NEXUS to manage business income, family expenses and two long-term goals.</div></div></div></div>
+  <div class="ms"><div><b>4.9 / 5</b><span class="sm">Early member rating</span></div><div><b>12 hrs</b><span class="sm">Saved from money admin yearly</span></div><div><b>93%</b><span class="sm">Feel more financially clear</span></div></div>
+</div></section>
+ 
+<section style="padding:60px 0"><div class="cta" id="join"><div class="w cg">
+  <div>
+    <div class="k" style="color:#9fd6c6">A CLEARER MONEY LIFE STARTS HERE</div>
+    <h2 class="serif">Bring every rupee into focus.</h2>
+    <p>Join the early access list and be among the first to turn everyday finances into confident next steps.</p>
+    <div class="row"><a class="btn b1" href="/register">Get early access</a><a class="btn b2" href="mailto:hello@nexus.app">Talk to the team</a></div>
+    <form id="wf"><input type="email" required placeholder="Email address" aria-label="Email address"><button class="btn b1">Join</button></form>
+    <small id="wm">No spam. No credit card. Early members help shape the product.</small>
+  </div>
+  <div class="cc">
+    <div class="pulse"><div class="ring" data-t="82"></div><div><div class="k">MONEY PULSE</div><b style="font-size:1.4rem">82 / 100</b><div class="sm">You’re on track for a stronger month.</div></div></div>
+    <div class="ln"><span>Japan fund</span><span>70%</span></div><div class="bk"><i style="width:70%"></i></div><b style="font-size:1.6rem">₹2,24,800</b>
+  </div>
+</div></div></section>
+ 
+<footer><div class="w">
+  <div class="fg">
+    <div><b style="letter-spacing:.08em;font-size:1.2rem">NEXUS</b><div class="k" style="margin:14px 0 8px">MONEY, MADE CLEARER</div><p class="sm" style="max-width:320px">Personal finance intelligence for a clearer view of today—and a more confident plan for tomorrow.</p><p class="sm" style="margin-top:14px">A useful note on money habits and product updates.</p></div>
+    <div><h6>PRODUCT</h6><ul><li><a href="#">Overview</a></li><li><a href="#insights">Insights</a></li><li><a href="#">Forecasting</a></li><li><a href="#security">Security</a></li></ul></div>
+    <div><h6>COMPANY</h6><ul><li><a href="#">About</a></li><li><a href="#">Careers</a></li><li><a href="#">Contact</a></li><li><a href="#">Journal</a></li></ul></div>
+    <div><h6>LEGAL</h6><ul><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Data policy</a></li><li><a href="#">Disclosures</a></li></ul></div>
+  </div>
+  <div class="fb"><span>© 2026 NEXUS Financial Intelligence. All rights reserved.</span><span>Designed thoughtfully in India · Amounts shown in INR</span></div>
+</div></footer>
+ 
+<script>
+const R=n=>'₹'+Math.round(n).toLocaleString('en-IN'),rd=matchMedia('(prefers-reduced-motion:reduce)').matches;
+document.querySelectorAll('[data-n]').forEach(e=>{const to=+e.dataset.n;if(rd){e.textContent=R(to);return}
+  const t0=performance.now();(function s(t){const p=Math.min(1,(t-t0)/1400);e.textContent=R(to*(1-Math.pow(1-p,4)));if(p<1)requestAnimationFrame(s)})(t0)});
+const p=document.getElementById('cfp'),L=p.getTotalLength();
+if(!rd){p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.getBoundingClientRect();p.style.transition='stroke-dashoffset 1.6s ease';p.style.strokeDashoffset=0}
+const jr=document.getElementById('jr');
+jr.oninput=()=>{const add=+jr.value,d=new Date(2027,1,14);d.setDate(d.getDate()-Math.round(add/4000*45));
+  document.getElementById('jd').textContent=d.toLocaleDateString('en-IN',{day:'numeric',month:'long',year:d.getFullYear()>2026?'numeric':undefined});
+  document.getElementById('jt').textContent=add?'Adding '+R(add)+' a month moves your date to '+d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+'.':'Drag to add a monthly top-up. Add ₹4,000 monthly to arrive by New Year.'};
+document.getElementById('wf').onsubmit=e=>{e.preventDefault();document.getElementById('wm').textContent='You’re on the list. We’ll be in touch soon.'};
+</script>
+</body>
+</html>

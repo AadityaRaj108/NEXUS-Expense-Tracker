@@ -1,0 +1,415 @@
+﻿
+{% extends "base.html" %}
+{% block title %}Transactions — NEXUS{% endblock %}
+
+{% block content %}
+<div class="page transactions-page">
+
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">FINANCIAL LEDGER</span>
+      <h1>Transactions</h1>
+      <p>Record and manage your income and expenses.</p>
+    </div>
+  </div>
+
+  <form method="post"
+        action="{{ url_for('main.add_transaction') }}"
+        class="transaction-entry-form">
+
+    <div class="transaction-type-selector">
+
+      <label class="transaction-type-option expense-option">
+        <input
+          type="radio"
+          name="kind"
+          value="expense"
+          checked
+          onchange="NexusTransactionType.update()"
+        >
+        <span>EXPENSE</span>
+      </label>
+
+      <label class="transaction-type-option income-option">
+        <input
+          type="radio"
+          name="kind"
+          value="income"
+          onchange="NexusTransactionType.update()"
+        >
+        <span>INCOME</span>
+      </label>
+
+    </div>
+
+    <div class="transaction-form-grid">
+
+      <div class="transaction-field amount-field">
+        <label for="transactionAmount">Amount</label>
+
+        <div class="amount-wrapper">
+          <span>₹</span>
+          <input
+            id="transactionAmount"
+            name="amount"
+            type="number"
+            min="0.01"
+            step="0.01"
+            placeholder="0.00"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="transaction-field">
+        <label
+          for="transactionCategory"
+          id="transactionCategoryLabel"
+        >
+          Expense Category
+        </label>
+
+        <select
+          id="transactionCategory"
+          name="category"
+          required
+        >
+          <option value="Food">Food</option>
+          <option value="Transport">Transport</option>
+          <option value="Bills">Bills</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Health">Health</option>
+          <option value="Education">Education</option>
+          <option value="Travel">Travel</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- EXPENSE PAYMENT METHOD -->
+      <div
+        class="transaction-field"
+        id="expensePaymentField"
+      >
+        <label for="transactionPayment">
+          Payment Method
+        </label>
+
+        <select
+          id="transactionPayment"
+          name="payment_method"
+          required
+        >
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Debit Card">Debit Card</option>
+          <option value="Credit Card">Credit Card</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- INCOME RECEIVED VIA -->
+      <div
+        class="transaction-field"
+        id="incomeReceivedField"
+        style="display:none;"
+      >
+        <label for="transactionReceivedVia">
+          Received Via
+        </label>
+
+        <select
+          id="transactionReceivedVia"
+          name="received_via"
+          disabled
+        >
+          <option value="UPI">UPI</option>
+          <option value="Net Banking">Net Banking</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cash">Cash</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Direct Deposit">Direct Deposit</option>
+          <option value="Digital Wallet">Digital Wallet</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="transaction-field">
+        <label for="transactionDate">Date</label>
+
+        <input
+          id="transactionDate"
+          name="transaction_date"
+          type="date"
+          value="{{ today }}"
+          required
+        >
+      </div>
+
+    </div>
+
+    <div class="transaction-field">
+      <label for="transactionNote">Note</label>
+
+      <input
+        id="transactionNote"
+        name="note"
+        type="text"
+        maxlength="500"
+        placeholder="Optional note..."
+      >
+    </div>
+
+    <div class="transaction-entry-actions">
+
+      <button
+        type="submit"
+        class="primary-btn"
+        id="transactionSubmitButton"
+      >
+        <span>Record Expense</span>
+        <b>↗</b>
+      </button>
+
+    </div>
+
+  </form>
+
+
+  <div class="transactions-list">
+
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">LEDGER</span>
+        <h2>Transaction History</h2>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+
+      <table class="transactions-table">
+
+        <thead>
+          <tr>
+            <th>DATE</th>
+            <th>TYPE</th>
+            <th>CATEGORY</th>
+            <th>METHOD / VIA</th>
+            <th>NOTE</th>
+            <th>AMOUNT</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for t in rows %}
+
+          <tr>
+
+            <td>{{ t.transaction_date }}</td>
+
+            <td>
+              <span class="pill {{ t.kind }}">
+                {{ t.kind }}
+              </span>
+            </td>
+
+            <td>{{ t.category }}</td>
+
+            <td>
+              <span class="transaction-method">
+                {% if t.kind == "income" %}
+                  {{ t.received_via or t.payment_method }}
+                {% else %}
+                  {{ t.payment_method }}
+                {% endif %}
+              </span>
+            </td>
+
+            <td>
+              {{ t.note or "—" }}
+            </td>
+
+            <td class="money {{ t.kind }}">
+              {% if t.kind == "income" %}
+                +₹{{ "%.2f"|format(t.amount) }}
+              {% else %}
+                −₹{{ "%.2f"|format(t.amount) }}
+              {% endif %}
+            </td>
+
+            <td>
+              <form
+                method="post"
+                action="{{ url_for('main.delete_transaction', tx_id=t.id) }}"
+                onsubmit="return confirm('Delete this transaction?');"
+              >
+                <button
+                  type="submit"
+                  class="danger-btn"
+                  title="Delete transaction"
+                >
+                  Delete
+                </button>
+              </form>
+            </td>
+
+          </tr>
+
+          {% else %}
+
+          <tr>
+            <td colspan="7" class="empty-state">
+              No transactions recorded yet.
+            </td>
+          </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+window.NexusTransactionType = {
+
+  update() {
+
+    const selected =
+      document.querySelector(
+        'input[name="kind"]:checked'
+      );
+
+    const category =
+      document.getElementById(
+        "transactionCategory"
+      );
+
+    const submit =
+      document.getElementById(
+        "transactionSubmitButton"
+      );
+
+    const categoryLabel =
+      document.getElementById(
+        "transactionCategoryLabel"
+      );
+
+    const expensePaymentField =
+      document.getElementById(
+        "expensePaymentField"
+      );
+
+    const incomeReceivedField =
+      document.getElementById(
+        "incomeReceivedField"
+      );
+
+    const expensePayment =
+      document.getElementById(
+        "transactionPayment"
+      );
+
+    const receivedVia =
+      document.getElementById(
+        "transactionReceivedVia"
+      );
+
+    if (
+      !selected ||
+      !category ||
+      !submit ||
+      !categoryLabel
+    ) {
+      return;
+    }
+
+    const isIncome =
+      selected.value === "income";
+
+
+    if (isIncome) {
+
+      categoryLabel.textContent =
+        "Income Source";
+
+      category.innerHTML = `
+        <option value="Salary">Salary</option>
+        <option value="Freelance">Freelance</option>
+        <option value="Business">Business</option>
+        <option value="Investment">Investment</option>
+        <option value="Gift">Gift</option>
+        <option value="Other">Other</option>
+      `;
+
+      expensePaymentField.style.display =
+        "none";
+
+      incomeReceivedField.style.display =
+        "";
+
+      expensePayment.disabled = true;
+      expensePayment.required = false;
+
+      receivedVia.disabled = false;
+      receivedVia.required = true;
+
+      submit.innerHTML =
+        "<span>Record Income</span><b>↗</b>";
+
+    } else {
+
+      categoryLabel.textContent =
+        "Expense Category";
+
+      category.innerHTML = `
+        <option value="Food">Food</option>
+        <option value="Transport">Transport</option>
+        <option value="Bills">Bills</option>
+        <option value="Shopping">Shopping</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Health">Health</option>
+        <option value="Education">Education</option>
+        <option value="Travel">Travel</option>
+        <option value="Other">Other</option>
+      `;
+
+      expensePaymentField.style.display =
+        "";
+
+      incomeReceivedField.style.display =
+        "none";
+
+      expensePayment.disabled = false;
+      expensePayment.required = true;
+
+      receivedVia.disabled = true;
+      receivedVia.required = false;
+
+      submit.innerHTML =
+        "<span>Record Expense</span><b>↗</b>";
+    }
+  }
+};
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    window.NexusTransactionType.update();
+  }
+);
+</script>
+
+{% endblock %}
+
+

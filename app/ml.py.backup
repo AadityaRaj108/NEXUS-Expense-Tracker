@@ -1,0 +1,47 @@
+from datetime import date
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from .db import get_db
+
+def monthly_expenses(user_id):
+    db = get_db()
+    rows = db.execute("""
+        SELECT substr(transaction_date,1,7) AS month, SUM(amount) AS total
+        FROM transactions
+        WHERE user_id=? AND kind='expense'
+        GROUP BY month
+        ORDER BY month
+    """, (user_id,)).fetchall()
+    return [(r["month"], float(r["total"])) for r in rows]
+
+def forecast_next_month(user_id):
+    history = monthly_expenses(user_id)
+    if not history:
+        return {
+            "value": 0.0, "method": "No personal history yet",
+            "months_used": 0, "confidence": "Not enough data"
+        }
+
+    values = np.array([v for _, v in history], dtype=float)
+
+    if len(values) >= 3:
+        # Use the user's own historical monthly totals.
+        x = np.arange(len(values), dtype=float).reshape(-1, 1)
+        model = LinearRegression().fit(x, values)
+        pred = float(model.predict([[len(values)]])[0])
+        method = "Linear trend on your monthly history"
+        confidence = "Model-based"
+    else:
+        # Honest cold-start fallback; no external dataset is used.
+        weights = np.arange(1, len(values) + 1, dtype=float)
+        pred = float(np.average(values, weights=weights))
+        method = "Weighted personal-history baseline"
+        confidence = "Early estimate"
+
+    pred = max(0.0, pred)
+    return {
+        "value": round(pred, 2),
+        "method": method,
+        "months_used": len(history),
+        "confidence": confidence
+    }

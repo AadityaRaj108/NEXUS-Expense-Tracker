@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Budgets — NEXUS{% endblock %}
+
+{% block content %}
+<div class="page budgets-page">
+
+    <!-- Page Header -->
+    <header class="topbar budgets-topbar">
+        <div>
+            <div class="eyebrow">CONTROL LAYER</div>
+            <h1>Budgets</h1>
+            <p class="muted">
+                Set monthly spending limits and monitor category burn.
+            </p>
+        </div>
+
+        <div class="page-status">
+            <span class="status-dot"></span>
+            Budget monitoring active
+        </div>
+    </header>
+
+
+    <!-- Budget Creation -->
+    <section class="budget-form-card">
+
+        <div class="section-heading">
+            <div>
+                <span class="section-kicker">NEW CONTROL</span>
+                <h2>Create a budget</h2>
+                <p class="muted">
+                    Define how much you want to spend for a category each month.
+                </p>
+            </div>
+        </div>
+
+        <form
+            method="post"
+            action="{{ url_for('main.save_budget') }}"
+            class="budget-form"
+        >
+
+            <div class="form-field">
+                <label for="budget-category">Category</label>
+
+                <select
+                    id="budget-category"
+                    name="category"
+                    required
+                >
+                    {% for c in categories %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="form-field">
+                <label for="budget-month">Month</label>
+
+                <input
+                    id="budget-month"
+                    name="month"
+                    type="month"
+                    value="{{ month }}"
+                    required
+                >
+            </div>
+
+
+            <div class="form-field">
+                <label for="budget-amount">Monthly limit</label>
+
+                <div class="input-with-prefix">
+                    <span>₹</span>
+
+                    <input
+                        id="budget-amount"
+                        name="amount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        required
+                    >
+                </div>
+            </div>
+
+
+            <div class="budget-submit">
+                <button
+                    class="primary-btn"
+                    type="submit"
+                >
+                    Set budget
+                    <span aria-hidden="true">→</span>
+                </button>
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- Budget Overview -->
+    <section class="budget-overview">
+
+        <div class="section-heading budget-list-heading">
+            <div>
+                <span class="section-kicker">MONTHLY OVERVIEW</span>
+                <h2>Budget controls</h2>
+                <p class="muted">
+                    Track spending against your defined limits.
+                </p>
+            </div>
+
+            <div class="month-indicator">
+                {{ month }}
+            </div>
+        </div>
+
+
+        <div class="budget-grid">
+
+            {% for b in rows %}
+
+                {% set pct = (b.spent / b.amount * 100) if b.amount else 0 %}
+                {% set capped_pct = [pct, 100]|min %}
+
+                <article class="budget-card">
+
+                    <div class="budget-card-header">
+
+                        <div class="budget-card-title">
+                            <span class="budget-month">
+                                {{ b.month }}
+                            </span>
+
+                            <h3>{{ b.category }}</h3>
+                        </div>
+
+                        <div class="budget-limit">
+                            <span>Limit</span>
+                            <strong>
+                                ₹{{ "%.0f"|format(b.amount) }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+                    <div class="budget-progress-area">
+
+                        <div class="budget-progress-header">
+                            <span>Spending progress</span>
+
+                            <strong>
+                                {{ "%.0f"|format(pct) }}%
+                            </strong>
+                        </div>
+
+                        <div
+                            class="progress"
+                            role="progressbar"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="{{ "%.0f"|format(pct) }}"
+                        >
+                            <i style="width: {{ capped_pct }}%"></i>
+                        </div>
+
+                    </div>
+
+
+                    <div class="budget-card-footer">
+
+                        <div>
+                            <span class="budget-footer-label">
+                                Spent
+                            </span>
+
+                            <strong>
+                                ₹{{ "%.0f"|format(b.spent) }}
+                            </strong>
+                        </div>
+
+
+                        <div class="budget-remaining">
+
+                            <span class="budget-footer-label">
+                                {% if b.spent > b.amount %}
+                                    Over budget
+                                {% else %}
+                                    Remaining
+                                {% endif %}
+                            </span>
+
+                            <strong>
+                                ₹{{ "%.0f"|format([b.amount - b.spent, 0]|max) }}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% else %}
+
+                <div class="budget-empty-state">
+
+                    <div class="empty-state-icon" aria-hidden="true">
+                        <span>₹</span>
+                    </div>
+
+                    <div>
+                        <h3>No budgets yet</h3>
+
+                        <p class="muted">
+                            You haven't created a budget for {{ month }}.
+                            Set your first monthly spending limit above to
+                            start monitoring your expenses.
+                        </p>
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</div>
+{% endblock %}

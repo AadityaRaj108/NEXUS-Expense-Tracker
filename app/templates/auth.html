@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ "Create Account" if mode == "register" else "Sign In" }} — NEXUS
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+
+    <main class="auth-shell">
+
+        <!-- Brand -->
+        <div class="auth-brand">
+            <a
+                href="{{ url_for('main.login' if mode != 'register' else 'main.register') }}"
+                class="auth-brand-link"
+                aria-label="NEXUS"
+            >
+                <span class="brand-mark">N</span>
+                <span class="brand-name">NEXUS</span>
+            </a>
+        </div>
+
+
+        <!-- Authentication Card -->
+        <section class="auth-card">
+
+            <div class="auth-card-header">
+
+                <div class="auth-eyebrow">
+                    {{ "CREATE PROFILE" if mode == "register" else "SECURE ACCESS" }}
+                </div>
+
+                <h1>
+                    {{ "Initialize your finance system."
+                       if mode == "register"
+                       else "Welcome back." }}
+                </h1>
+
+                <p class="muted">
+                    {{ "Create your personal financial workspace."
+                       if mode == "register"
+                       else "Continue to your financial command center." }}
+                </p>
+
+            </div>
+
+
+            <!-- Authentication Form -->
+            <form
+                method="post"
+                class="auth-form"
+                novalidate
+            >
+
+                {% if mode == "register" %}
+                <div class="form-field">
+
+                    <label for="auth-name">
+                        Full name
+                    </label>
+
+                    <input
+                        id="auth-name"
+                        type="text"
+                        name="name"
+                        required
+                        autocomplete="name"
+                        placeholder="Your name"
+                    >
+
+                </div>
+                {% endif %}
+
+
+                <div class="form-field">
+
+                    <label for="auth-email">
+                        Email address
+                    </label>
+
+                    <input
+                        id="auth-email"
+                        type="email"
+                        name="email"
+                        required
+                        autocomplete="email"
+                        placeholder="you@example.com"
+                    >
+
+                </div>
+
+
+                <div class="form-field">
+
+                    <div class="field-label-row">
+                        <label for="auth-password">
+                            Password
+                        </label>
+                    </div>
+
+                    <input
+                        id="auth-password"
+                        type="password"
+                        name="password"
+                        required
+                        minlength="6"
+                        autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}"
+                        placeholder="Minimum 6 characters"
+                    >
+
+                </div>
+
+
+                <button
+                    class="primary-btn auth-submit"
+                    type="submit"
+                >
+                    <span>
+                        {{ "Create Profile"
+                           if mode == "register"
+                           else "Enter NEXUS" }}
+                    </span>
+
+                    <b aria-hidden="true">→</b>
+                </button>
+
+            </form>
+
+
+            <!-- Authentication Switch -->
+            <div class="auth-switch">
+
+                <span>
+                    {{ "Already registered?"
+                       if mode == "register"
+                       else "New to NEXUS?" }}
+                </span>
+
+                <a
+                    href="{{ url_for('main.login' if mode == 'register' else 'main.register') }}"
+                >
+                    {{ "Sign in"
+                       if mode == "register"
+                       else "Create an account" }}
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Security / Product Context -->
+        <div class="auth-footer">
+            <span>Personal finance workspace</span>
+            <span class="auth-footer-divider"></span>
+            <span>NEXUS</span>
+        </div>
+
+    </main>
+
+</div>
+{% endblock %}

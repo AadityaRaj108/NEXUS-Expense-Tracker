@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+ 
+{% block title %}Dashboard — NEXUS{% endblock %}
+ 
+{% block content %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap');
+/* ===== NEXUS dashboard design system: 8px grid, fixed type scale ===== */
+:root{--g:#0e7c66;--gd:#0d3b33;--gl:#d7efe6;--ink:#13203a;--mu:#5d6a80;--ln:#dfe4dc;--am:#f2a93b;--rd:#d24f69;--r:20px;--gap:24px;--pad:28px}
+body{background:#f4f6f1}
+[hidden]{display:none!important}
+.page.dashboard-page{font:400 15px/1.55 Manrope,system-ui,sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;max-width:1320px;margin:0 auto;padding:40px 48px 88px}
+.dashboard-page::before,.dashboard-page::after,.dashboard-page .dashboard-grid::after,
+.dashboard-page .glass-card::before,.dashboard-page .glass-card::after,
+.dashboard-page .stat-card::before,.dashboard-page .stat-card::after,
+.dashboard-page .primary-btn::before,.dashboard-page .primary-btn::after,
+.dashboard-page .outline-btn::before,.dashboard-page .card-glow{display:none}
+.dashboard-page h1,.dashboard-page h2,.dashboard-page h3{font-family:'Instrument Serif',serif;font-weight:400;letter-spacing:-.01em;color:var(--ink)}
+.dashboard-page small,.dashboard-page .eyebrow{font:700 12px/1.2 Manrope;letter-spacing:.08em;color:var(--mu)}
+.dashboard-page .eyebrow::before{background:var(--g);box-shadow:none;animation:none}
+.dashboard-page .muted{font:400 16px/1.6 Manrope;color:var(--mu)}
+ 
+/* header */
+.dashboard-page .topbar{margin-bottom:40px;align-items:center}
+.dashboard-page .topbar::after{background:var(--ln)}
+.dashboard-page .topbar h1{font-size:clamp(2.25rem,4vw,3.25rem);line-height:1.05;margin:12px 0 8px;background:none;-webkit-text-fill-color:var(--ink)}
+.dashboard-page .system-status{background:var(--gl);border:0;color:var(--g);font:800 12px Manrope;letter-spacing:.08em;box-shadow:none;padding:10px 16px}
+.dashboard-page .pulse{background:var(--g);box-shadow:0 0 0 4px rgba(14,124,102,.18)}
+ 
+/* cards */
+.dashboard-page .glass-card,.dashboard-page .stat-card{background:#fff;border:1px solid var(--ln);border-radius:var(--r);box-shadow:none;backdrop-filter:none;padding:var(--pad)}
+.dashboard-page .glass-card:hover,.dashboard-page .stat-card:hover{box-shadow:0 24px 50px -30px rgba(19,32,58,.35);border-color:#cfd7cb;transform:none}
+.dashboard-page .card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}
+.dashboard-page .card-head h2{font-size:28px;line-height:1.1;margin:8px 0 0}
+.dashboard-page .card-head a,.dashboard-page .card-link{color:var(--g);font:700 14px/1 Manrope;border-bottom:2px solid var(--gl);padding-bottom:4px;white-space:nowrap}
+.dashboard-page .card-head a::after{display:none}
+ 
+/* grids */
+.dashboard-page .stat-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gap);margin-bottom:var(--gap)}
+.dashboard-page .dashboard-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:var(--gap);margin-bottom:var(--gap);align-items:stretch}
+ 
+/* stat cards */
+.dashboard-page .stat-card{display:flex;flex-direction:column;min-height:176px;position:relative;overflow:hidden}
+.dashboard-page .stat-card strong{font:800 30px/1.1 Manrope;letter-spacing:-.02em;color:var(--ink);margin:14px 0 0}
+.dashboard-page .stat-card span{margin-top:auto;padding-top:16px;font:500 13px/1.4 Manrope;color:var(--mu)}
+.dashboard-page .stat-card.accent{background:var(--gd);border-color:var(--gd)}
+.dashboard-page .stat-card.accent small,.dashboard-page .stat-card.accent span{color:#9fd6c6}
+.dashboard-page .stat-card.accent strong{color:#fff}
+.dashboard-page .rate{position:absolute;left:0;right:0;bottom:0;height:6px;background:rgba(255,255,255,.14)}
+.dashboard-page .rate u{display:block;height:100%;background:var(--am);text-decoration:none}
+.dashboard-page .stat-card.forecast{background:var(--gl);border-color:var(--gl)}
+.dashboard-page .forecast strong{color:var(--g);text-shadow:none}
+.dashboard-page .positive{color:var(--g)!important}
+.dashboard-page .negative{color:var(--rd)!important}
+ 
+/* chart card */
+.dashboard-page .chart-card,.dashboard-page .quick-card,.dashboard-page .insight-card,.dashboard-page .communication-card{display:flex;flex-direction:column}
+.dashboard-page .chart-box{height:240px;padding:0;background:none}
+.dashboard-page .chart-box::before,.dashboard-page .chart-box::after{display:none}
+.cats{list-style:none;margin:24px 0 0;padding:20px 0 0;border-top:1px solid var(--ln);display:grid;gap:14px}
+.cats li{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font:600 14px/1.2 Manrope}
+.cats i{grid-column:1/-1;height:8px;border-radius:9px;background:#eef1ea;overflow:hidden}
+.cats u{display:block;height:100%;background:var(--g);border-radius:9px}
+ 
+/* forms */
+.dashboard-page .quick-form,.dashboard-page .communication-form{display:flex;flex-direction:column;gap:16px;flex:1}
+.dashboard-page .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dashboard-page input,.dashboard-page select,.dashboard-page textarea{background:#fff;border:1.5px solid var(--ln);border-radius:12px;color:var(--ink);font:500 15px/1.4 Manrope;padding:0 16px;height:48px;box-shadow:none}
+.dashboard-page textarea{height:auto;min-height:168px;padding:14px 16px;resize:vertical;flex:1}
+.dashboard-page input:focus,.dashboard-page select:focus,.dashboard-page textarea:focus{border-color:var(--g);box-shadow:0 0 0 4px var(--gl);transform:none}
+.dashboard-page .amount-input{font:400 38px 'Instrument Serif';height:76px;padding:0 20px;background:#f4f6f1;border-color:transparent}
+.dashboard-page .segmented{background:#eef1ea;border:0;border-radius:99px;padding:4px;height:48px}
+.dashboard-page .segmented span{border-radius:99px;font:700 14px/40px Manrope;color:var(--mu);padding:0}
+.dashboard-page .segmented input:checked+span{background:var(--ink);color:#fff;box-shadow:none}
+.dashboard-page .segmented input:checked+span::after{display:none}
+.dashboard-page .primary-btn,.dashboard-page .outline-btn{min-height:48px;padding:0 24px;border-radius:99px;font:700 15px Manrope;box-shadow:none}
+.dashboard-page .primary-btn{background:var(--g);border:0;color:#fff;margin-top:auto}
+.dashboard-page .primary-btn:hover{background:#0b6654;transform:translateY(-2px);box-shadow:0 12px 24px -10px rgba(14,124,102,.6)}
+.dashboard-page .outline-btn{background:#fff;border:1.5px solid var(--ink);color:var(--ink)}
+.dashboard-page .outline-btn:hover{background:var(--ink);color:#fff}
+ 
+/* voice */
+.dashboard-page #voiceTrigger{background:var(--gl);border:0;border-radius:99px;box-shadow:none;min-height:40px;padding:0 16px}
+.dashboard-page #voiceTrigger,.dashboard-page #voiceTrigger *{color:var(--g);font:700 13px Manrope}
+.dashboard-page #voiceTrigger.active{background:var(--rd)}
+.dashboard-page #voiceTrigger.active,.dashboard-page #voiceTrigger.active *{color:#fff}
+.dashboard-page #voicePanel{background:#f4f6f1;border:1px solid var(--ln);border-radius:16px;box-shadow:none;padding:20px;margin:0 0 16px}
+.dashboard-page #voicePanel::before{display:none}
+.voice-panel-head{display:flex;justify-content:space-between;align-items:center}
+.voice-panel-head small,.voice-panel-head strong{display:block}
+.dashboard-page #voiceStatus{color:var(--ink)!important;font:700 15px/1.4 Manrope;letter-spacing:0;margin-top:6px}
+.dashboard-page #voiceLiveDot.active{background:var(--rd);box-shadow:0 0 0 5px rgba(210,79,105,.2)}
+.dashboard-page #voiceTranscript{background:#fff;border:1px solid var(--ln);color:var(--ink)!important;font:500 14px/1.5 Manrope;margin:16px 0;padding:14px 16px}
+.dashboard-page #voicePanel button{background:#fff;border:1.5px solid var(--ln);color:var(--ink)!important;box-shadow:none;border-radius:99px;font:700 14px Manrope;min-height:44px}
+.dashboard-page #voicePanel button.primary-btn{background:var(--g);border-color:var(--g);color:#fff!important;margin-top:0}
+.dashboard-page #voicePanel .voice-cancel{margin-top:8px;width:100%;color:var(--rd)!important}
+ 
+/* communication */
+.communication-section{margin:56px 0 var(--gap)}
+.section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:32px;flex-wrap:wrap}
+.dashboard-page .section-heading h2{font-size:clamp(2rem,3.4vw,2.75rem);line-height:1.05;margin:12px 0 8px}
+.communication-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-bottom:var(--gap)}
+.communication-card-head{display:flex;gap:16px;align-items:center;margin-bottom:24px}
+.communication-card-head h3{font-size:28px;line-height:1.1;margin-top:6px}
+.communication-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font:800 13px Manrope;background:var(--gl);color:var(--g)}
+.communication-icon.sms{background:#f7e8cb;color:#9a6410}
+.communication-form label{font:700 13px/1 Manrope;margin:8px 0 -8px}
+.field-hint{font:400 13px/1.4 Manrope;color:var(--mu)}
+.message-counter{text-align:right;font:500 13px Manrope;color:var(--mu)}
+.message-counter .warning{color:#9a6410}.message-counter .danger{color:var(--rd);font-weight:700}
+.communication-form-status{min-height:20px;font:600 14px/1.4 Manrope;color:var(--mu)}
+.communication-form-status.success,#communicationHistoryStatus.success{color:var(--g)}
+.communication-form-status.error,#communicationHistoryStatus.error{color:var(--rd)}
+#communicationHistoryStatus{font:600 14px Manrope;color:var(--mu)}
+.communication-history{display:grid}
+.communication-loading,.communication-empty{padding:32px 8px;text-align:center;color:var(--mu);display:grid;gap:6px;justify-items:center;font:500 15px Manrope}
+.communication-empty-icon{font-size:32px;color:var(--g)}
+.communication-history-item{display:grid;grid-template-columns:48px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--ln)}
+.communication-history-item-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--gl);color:var(--g);font:800 12px Manrope}
+.communication-history-item[data-channel="sms"] .communication-history-item-icon{background:#f7e8cb;color:#9a6410}
+.communication-history-item-heading{display:flex;gap:10px;align-items:center;font:700 15px Manrope}
+.communication-history-item .communication-history-status{font:800 11px Manrope;padding:4px 10px;border-radius:99px;background:var(--gl);color:var(--g)}
+.communication-history-item .communication-history-status[data-status="failed"]{background:#fbe3e8;color:var(--rd)}
+.communication-history-recipient,.communication-history-time,.communication-history-provider{font:400 13px/1.5 Manrope;color:var(--mu)}
+.communication-history-subject{font:700 15px Manrope;margin-top:4px}
+.communication-history-message{font:400 14px/1.5 Manrope;margin-top:6px;color:var(--mu);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.communication-history-item-footer{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.communication-history-error{color:var(--rd);font-size:13px}
+ 
+/* activity + forecast */
+.dashboard-page .transaction{grid-template-columns:44px minmax(0,1fr) auto;gap:16px;padding:16px 0;border-bottom:1px solid #edf0ea}
+.dashboard-page .transaction:last-child{border-bottom:0}
+.dashboard-page .transaction::before{display:none}
+.dashboard-page .transaction:hover{transform:none}
+.dashboard-page .tx-icon{width:44px;height:44px;border-radius:14px;background:#f4f6f1;border:0;font-size:18px}
+.dashboard-page .tx-icon.income{color:var(--g)}.dashboard-page .tx-icon.expense{color:var(--rd)}
+.dashboard-page .tx-main strong{font:700 15px/1.3 Manrope;color:var(--ink)}
+.dashboard-page .tx-main span{font:400 13px/1.4 Manrope;color:var(--mu);margin-top:2px}
+.dashboard-page .transaction>b{font:800 15px Manrope}
+.dashboard-page .transaction>b.income{color:var(--g)}.dashboard-page .transaction>b.expense{color:var(--rd)}
+.dashboard-page .empty{color:var(--mu);font:500 15px Manrope;padding:40px 8px}
+.dashboard-page .insight-card{background:var(--gd);border-color:var(--gd);align-items:flex-start;text-align:left}
+.dashboard-page .insight-card>small{color:#9fd6c6}
+.dashboard-page .insight-card h2{font-size:28px;line-height:1.1;color:#fff;margin:8px 0 24px}
+.dashboard-page .signal-ring{animation:none;width:84px;height:84px;margin:0 0 20px;background:conic-gradient(var(--am) 0 72%,rgba(255,255,255,.15) 0);box-shadow:none}
+.dashboard-page .signal-ring::before,.dashboard-page .signal-ring::after{display:none}
+.dashboard-page .signal-ring span{width:62px;height:62px;border-radius:50%;background:var(--gd);display:grid;place-items:center;color:var(--am);font-size:24px;animation:none}
+.dashboard-page .insight-card>strong{font:400 36px/1.1 'Instrument Serif';color:var(--am)}
+.dashboard-page .insight-card p{color:#b9d9d0;font:400 15px/1.6 Manrope;max-width:none;margin:12px 0 24px}
+.dashboard-page .insight-card .outline-btn{margin-top:auto;border-color:#fff;color:#fff;background:transparent}
+.dashboard-page .insight-card .outline-btn:hover{background:#fff;color:var(--gd)}
+ 
+@media(max-width:1180px){.dashboard-page .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:980px){.dashboard-page .dashboard-grid,.communication-grid{grid-template-columns:1fr}.page.dashboard-page{padding:32px 28px 72px}}
+@media(max-width:650px){.page.dashboard-page{padding:24px 16px 64px}.dashboard-page .stat-grid,.dashboard-page .form-row{grid-template-columns:1fr}.dashboard-page .glass-card,.dashboard-page .stat-card{padding:22px}.dashboard-page .card-head h2,.communication-card-head h3{font-size:24px}}
+</style>
+ 
+<div class="page dashboard-page">
+ 
+  <header class="topbar dashboard-topbar">
+    <div class="topbar-copy">
+      <div class="eyebrow">FINANCIAL COMMAND CENTER</div>
+      <h1>Good to see you, {{ name.split()[0] }}.</h1>
+      <p class="muted">Your personal financial system is online.</p>
+    </div>
+    <div class="system-status" aria-label="NEXUS system status">
+      <span class="pulse"></span><span>LIVE</span>
+    </div>
+  </header>
+ 
+  {% set inc = income|float(0) %}
+  {% set exp = expense|float(0) %}
+  {% set rate = (((inc - exp) / inc * 100) | round(1)) if inc > 0 else 0 %}
+  {% set pct = 0 if rate < 0 else (100 if rate > 100 else rate) %}
+ 
+  <section class="stat-grid dashboard-stat-grid" aria-label="Financial overview">
+    <div class="stat-card accent">
+      <small>NET BALANCE</small>
+      <strong data-counter="{{ '%.2f'|format(balance|float(0)) }}" data-prefix="₹" data-decimals="2">₹{{ "%.2f"|format(balance|float(0)) }}</strong>
+      <span>Income − expenses · {{ rate }}% saved</span>
+      <i class="rate"><u style="width:{{ pct }}%"></u></i>
+    </div>
+    <div class="stat-card">
+      <small>TOTAL INCOME</small>
+      <strong data-counter="{{ '%.2f'|format(income|float(0)) }}" data-prefix="₹" data-decimals="2">₹{{ "%.2f"|format(income|float(0)) }}</strong>
+      <span class="positive">↗ Recorded income</span>
+    </div>
+    <div class="stat-card">
+      <small>TOTAL EXPENSE</small>
+      <strong data-counter="{{ '%.2f'|format(expense|float(0)) }}" data-prefix="₹" data-decimals="2">₹{{ "%.2f"|format(expense|float(0)) }}</strong>
+      <span class="negative">↘ Recorded spending</span>
+    </div>
+    <div class="stat-card forecast">
+      <small>NEXT-MONTH FORECAST</small>
+      <strong data-counter="{{ '%.2f'|format(forecast.value|float(0)) }}" data-prefix="₹" data-decimals="2">₹{{ "%.2f"|format(forecast.value|float(0)) }}</strong>
+      <span>◈ {{ forecast.method }}</span>
+    </div>
+  </section>
+ 
+  <section class="dashboard-grid dashboard-primary-grid">
+ 
+    <div class="glass-card chart-card dashboard-chart-card">
+      <div class="card-head">
+        <div><small>EXPENSE DISTRIBUTION</small><h2>Where your money goes</h2></div>
+        <a href="{{ url_for('main.analytics') }}" class="card-link">Full analytics →</a>
+      </div>
+      <div class="chart-box">
+        <canvas id="categoryChart" aria-label="Expense distribution chart" role="img"></canvas>
+      </div>
+      {% if category_totals %}
+      <ul class="cats">
+        {% for c in (category_totals|list)[:4] %}
+        <li><span>{{ c.category }}</span><b>₹{{ "%.0f"|format(c.total|float(0)) }}</b>
+          <i><u style="width:{{ ((c.total|float(0) / exp * 100) | round(1)) if exp > 0 else 0 }}%"></u></i></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+ 
+    <div class="glass-card quick-card dashboard-quick-card">
+      <div class="card-head">
+        <div><small>QUICK CAPTURE</small><h2>Add transaction</h2></div>
+        <button type="button" class="voice-trigger" id="voiceTrigger"
+          title="Add transaction using your voice" aria-label="Add transaction using your voice"
+          aria-controls="voicePanel" aria-expanded="false">
+          <span class="voice-icon">●</span><span id="voiceTriggerText">Voice</span>
+        </button>
+      </div>
+ 
+      <div class="voice-panel" id="voicePanel" hidden>
+        <div class="voice-panel-head">
+          <div><small>VOICE ENTRY</small><strong id="voiceStatus">Ready to listen</strong></div>
+          <span class="voice-live-dot" id="voiceLiveDot" aria-hidden="true"></span>
+        </div>
+        <p id="voiceTranscript" class="voice-transcript" aria-live="polite">Try: “Spent 500 on dinner using UPI.”</p>
+        <button type="button" class="primary-btn full" id="voiceStart">Start listening</button>
+        <button type="button" class="voice-cancel" id="voiceCancel">Cancel</button>
+      </div>
+ 
+      <form class="quick-form" id="transactionForm" method="post" action="{{ url_for('main.add_transaction') }}">
+        <div class="segmented" role="radiogroup" aria-label="Transaction type">
+          <label><input type="radio" name="kind" value="expense" checked><span>Expense</span></label>
+          <label><input type="radio" name="kind" value="income"><span>Income</span></label>
+        </div>
+        <input class="amount-input" id="voiceAmount" name="amount" type="number" step="0.01" min="0.01"
+          inputmode="decimal" placeholder="₹ 0.00" aria-label="Transaction amount" required>
+        <div class="form-row">
+          <select name="category" id="voiceCategory" aria-label="Transaction category">
+            {% for c in categories %}<option>{{ c }}</option>{% endfor %}
+          </select>
+          <select name="payment_method" id="voicePayment" aria-label="Payment method">
+            {% for p in payments %}<option>{{ p }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <input name="transaction_date" id="voiceDate" type="date" value="{{ today }}" aria-label="Transaction date" required>
+          <input name="note" id="voiceNote" type="text" maxlength="500" placeholder="Note (optional)" aria-label="Transaction note">
+        </div>
+        <button class="primary-btn full" type="submit"><span>Record transaction</span><b>↗</b></button>
+      </form>
+    </div>
+  </section>
+ 
+  <section class="communication-section" aria-labelledby="communicationHeading">
+    <div class="section-heading">
+      <div>
+        <div class="eyebrow">COMMUNICATION CENTER</div>
+        <h2 id="communicationHeading">Connect. Notify. Track.</h2>
+        <p class="muted">Send emails and SMS messages directly from your NEXUS workspace and keep a record of every communication.</p>
+      </div>
+      <button type="button" class="outline-btn communication-refresh" id="communicationRefresh">↻ Refresh history</button>
+    </div>
+ 
+    <div class="communication-grid">
+      <div class="glass-card communication-card email-card">
+        <div class="communication-card-head">
+          <div class="communication-icon email" aria-hidden="true">@</div>
+          <div><small>EMAIL</small><h3>Send an email</h3></div>
+        </div>
+        <form id="emailSendForm" class="communication-form" novalidate>
+          <label for="emailRecipient">Recipient</label>
+          <input id="emailRecipient" name="recipient" type="email" autocomplete="email" placeholder="recipient@example.com" required>
+          <label for="emailSubject">Subject</label>
+          <input id="emailSubject" name="subject" type="text" maxlength="200" placeholder="NEXUS notification" required>
+          <label for="emailMessage">Message</label>
+          <textarea id="emailMessage" name="message_body" rows="6" maxlength="50000" placeholder="Write your message..." required></textarea>
+          <div class="communication-form-status" id="emailFormStatus" aria-live="polite"></div>
+          <button type="submit" class="primary-btn full" id="emailSendButton"><span>Send email</span><b>↗</b></button>
+        </form>
+      </div>
+ 
+      <div class="glass-card communication-card sms-card">
+        <div class="communication-card-head">
+          <div class="communication-icon sms" aria-hidden="true">SMS</div>
+          <div><small>TEXT MESSAGE</small><h3>Send an SMS</h3></div>
+        </div>
+        <form id="smsSendForm" class="communication-form" novalidate>
+          <label for="smsRecipient">Phone number</label>
+          <input id="smsRecipient" name="recipient" type="tel" inputmode="tel" autocomplete="tel" placeholder="+91XXXXXXXXXX" required>
+          <span class="field-hint">Use international format, e.g. +91XXXXXXXXXX</span>
+          <label for="smsMessage">Message</label>
+          <textarea id="smsMessage" name="message_body" rows="8" maxlength="1600" placeholder="Write your SMS message..." required></textarea>
+          <div class="message-counter" aria-live="polite"><span id="smsMessageCounter">0 / 1600</span></div>
+          <div class="communication-form-status" id="smsFormStatus" aria-live="polite"></div>
+          <button type="submit" class="primary-btn full" id="smsSendButton"><span>Send SMS</span><b>↗</b></button>
+        </form>
+      </div>
+    </div>
+ 
+    <div class="glass-card communication-history-card">
+      <div class="card-head">
+        <div><small>COMMUNICATION LOG</small><h2>Recent messages</h2></div>
+        <div class="communication-history-status" id="communicationHistoryStatus" aria-live="polite">Ready</div>
+      </div>
+      <div class="communication-loading" id="communicationLoading">Loading communication history…</div>
+      <div class="communication-empty" id="communicationEmpty" hidden>
+        <div class="communication-empty-icon" aria-hidden="true">◌</div>
+        <strong>No communications yet</strong>
+        <span>Emails and SMS messages you send from NEXUS will appear here.</span>
+      </div>
+      <div class="communication-history" id="communicationHistory"></div>
+    </div>
+  </section>
+ 
+  <section class="dashboard-grid lower dashboard-lower-grid">
+    <div class="glass-card">
+      <div class="card-head">
+        <div><small>RECENT ACTIVITY</small><h2>Latest transactions</h2></div>
+        <a href="{{ url_for('main.transactions') }}" class="card-link">View all →</a>
+      </div>
+      <div class="transaction-list">
+        {% for t in recent %}
+        <div class="transaction">
+          <div class="tx-icon {{ t.kind }}" aria-hidden="true">{{ "↑" if t.kind=="income" else "↓" }}</div>
+          <div class="tx-main">
+            <strong>{{ t.category }}</strong>
+            <span>{{ t.note or t.payment_method }} · {{ t.transaction_date }}</span>
+          </div>
+          <b class="{{ t.kind }}">{{ "+" if t.kind=="income" else "−" }}₹{{ "%.2f"|format(t.amount|float(0)) }}</b>
+        </div>
+        {% else %}
+        <div class="empty">No transactions yet. Add your first one above.</div>
+        {% endfor %}
+      </div>
+    </div>
+ 
+    <div class="glass-card insight-card">
+      <small>FORECAST ENGINE</small>
+      <h2>Personalized signal</h2>
+      <div class="signal-ring" aria-hidden="true"><span>◈</span></div>
+      <strong>{{ forecast.confidence }}</strong>
+      <p>{{ forecast.method }}. Your prediction improves as you record more months of your own expenses.</p>
+      <a class="outline-btn" href="{{ url_for('main.analytics') }}">Open intelligence →</a>
+    </div>
+  </section>
+ 
+</div>
+{% endblock %}
+ 
+ 
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+ 
+  const labels = {{ category_totals|map(attribute='category')|list|tojson }};
+  const values = {{ category_totals|map(attribute='total')|map('float')|list|tojson }};
+ 
+  if (window.NexusCharts && typeof window.NexusCharts.donut === "function") {
+    const ch = window.NexusCharts.donut("categoryChart", labels, values);
+    if (ch) {
+      const ds = ch.data.datasets[0];
+      ds.backgroundColor = ["#0e7c66","#f2a93b","#5b4bdb","#13203a","#d24f69","#3fb8a0","#8a7bf0","#b9c4b4","#8a97ab"];
+      ds.borderColor = "#ffffff";
+      ds.borderWidth = 3;
+      ch.options.plugins.legend.labels.color = "#5d6a80";
+      ch.update();
+    }
+  }
+ 
+  /* Voice panel buttons that app.js does not bind itself */
+  const trigger = document.getElementById("voiceTrigger");
+  const panel = document.getElementById("voicePanel");
+  document.getElementById("voiceStart")?.addEventListener("click", () => trigger?.click());
+  document.getElementById("voiceCancel")?.addEventListener("click", () => {
+    if (panel) panel.hidden = true;
+    trigger?.setAttribute("aria-expanded", "false");
+  });
+});
+</script>
+{% endblock %}
